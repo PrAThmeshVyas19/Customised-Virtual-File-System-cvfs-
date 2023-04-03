@@ -264,22 +264,7 @@ void CloseFileByName(int fd)
     (UFDTArr[fd].ptrfiletable->ptrinode->ReferenceCount)--;
 }
 
-int CloseFileByName(char *name)
-{
-    int i = 0;
-    i = GetFDFromName(name);
 
-    if(i == -1)
-    {
-        return -1;
-    }
-
-    UFDTArr[i].ptrfiletable->readoffset = 0;
-    UFDTArr[i].ptrfiletable->writeoffset = 0;
-    (UFDTArr[i].ptrfiletable->ptrinode->ReferenceCount)--;
-
-    return 0;
-}
 
 int GetFDFromName(char *name)
 {
@@ -305,6 +290,23 @@ int GetFDFromName(char *name)
     {
         return i;
     }
+}
+
+int CloseFileByName(char *name)
+{
+    int i = 0;
+    i = GetFDFromName(name);
+
+    if(i == -1)
+    {
+        return -1;
+    }
+
+    UFDTArr[i].ptrfiletable->readoffset = 0;
+    UFDTArr[i].ptrfiletable->writeoffset = 0;
+    (UFDTArr[i].ptrfiletable->ptrinode->ReferenceCount)--;
+
+    return 0;
 }
 
 // rm_FIle("Demo.txt")
@@ -449,6 +451,30 @@ int truncate_File(char *name)
     UFDTArr[fd].ptrfiletable->ptrinode->FileActualSize = 0;
 }
 
+
+
+PINODE Get_Inode(char *name)
+{
+    PINODE temp = head;
+    int i = 0;
+
+    if(name == NULL)
+    {
+        return NULL;
+    }
+
+    while(temp != NULL)
+    {
+        if(strcmp(name , temp->FileName) == 0)
+        {
+            break;
+        }
+        temp = temp->next;
+    }
+
+    return temp;
+}
+
 int CreateFile(char *name , int permission)
 {
     int i = 0;
@@ -466,7 +492,7 @@ int CreateFile(char *name , int permission)
 
     (SUPERBLOCKobj.FreeInode)--;
 
-    if(Get_Inode(name) != NULL)
+    if((Get_Inode(name)) != NULL)
     {
         return -3;
     }
@@ -508,28 +534,6 @@ int CreateFile(char *name , int permission)
     UFDTArr[i].ptrfiletable->ptrinode->Buffer = (char *)malloc(MAXFILESIZE);
 
     return i;
-}
-
-PINODE Get_Inode(char *name)
-{
-    PINODE temp = head;
-    int i = 0;
-
-    if(name == NULL)
-    {
-        return NULL;
-    }
-
-    while(temp != NULL)
-    {
-        if(strcmp(name , temp->FileName) == 0)
-        {
-            break;
-        }
-        temp = temp->next;
-    }
-
-    return temp;
 }
 
 int OpenFile(char * name , int mode)
